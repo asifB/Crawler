@@ -20,8 +20,8 @@ import org.jsoup.select.Elements;
 
 public class Crawler {
 
-	public static List<String> visitedUrls = new ArrayList<String>();
-	public static List<String> unvisitedUrls = new ArrayList<String>();
+	public List<String> visitedUrls; /*= new ArrayList<String>();*/
+	public List<String> unvisitedUrls; /*= new ArrayList<String>();*/
 	public static String BASEURL ;
 
 	/**
@@ -29,7 +29,13 @@ public class Crawler {
 	 * @param url
 	 */
 	
-	private static void readProperties() {
+	public Crawler(){
+		readProperties();
+		visitedUrls = new ArrayList<String>();
+		unvisitedUrls = new ArrayList<String>();
+	}
+	
+	private void readProperties() {
 		Properties crawlerProperties = new Properties();
 		try {
 			InputStream fileInputStream = new FileInputStream(new File(
@@ -42,7 +48,7 @@ public class Crawler {
 			e.printStackTrace();
 		}
 	}
-	public static void parseUrls() {
+	public void parseUrls() {
 		readProperties();
 		if (visitedUrls.contains(BASEURL)) {
 			return;
@@ -69,13 +75,4 @@ public class Crawler {
 			ie.printStackTrace();
 		}
 	}
-
-	/**
-	 * @return void
-	 * @param url
-	 */
-	
-
-	
-
 }

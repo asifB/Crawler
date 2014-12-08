@@ -9,7 +9,7 @@ import org.apache.commons.io.FileUtils;
 public class Downloader {
 
 	
-	public static void downloadData(String url) {
+	public void downloadData(String url, Crawler crawler) {
 		try {
 			final String fileName = getFileName(url);
 			URL finalUrl = new URL(url);
@@ -17,7 +17,7 @@ public class Downloader {
 
 			FileUtils.copyURLToFile(finalUrl, filePath);
 
-			Crawler.visitedUrls.add(url);
+			crawler.visitedUrls.add(url);
 
 		} catch (IOException ie) {
 			ie.printStackTrace();
@@ -26,7 +26,7 @@ public class Downloader {
 		}
 	}
 
-	private static String getFileName(String url) throws IOException {
+	private String getFileName(String url) throws IOException {
 
 		final File parentDir = new File("./2014mails");
 		if (!parentDir.exists()) {
