@@ -25,6 +25,7 @@ public class Downloader {
 
 		} catch (IOException ie) {
 			log.error(ie.getMessage(),ie);
+			finalUrl = null;
 		}
 		return finalUrl.toString();
 	}

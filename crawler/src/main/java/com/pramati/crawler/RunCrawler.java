@@ -1,6 +1,6 @@
 package com.pramati.crawler;
 
-import java.net.UnknownHostException;
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -17,18 +17,18 @@ public class RunCrawler {
 		Downloader download = new Downloader();
 		try {
 			crawler.parseUrls();
-		} catch (UnknownHostException ue) {
-			log.error(ue.getMessage(), ue);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		List<String> visitedUrls = crawler.getVisitedUrlList();
-		for (String link : crawler.getUnvisitedUrlList()) {
-			if (!visitedUrls.contains(link)) {
-				String url = download.downloadData(link.replace("/date", ""));
-				visitedUrls.add(url);
-			}
+			List<String> visitedUrls = crawler.getVisitedUrlList();
+			for (String link : crawler.getUnvisitedUrlList()) {
+				if (!visitedUrls.contains(link)) {
+					String url = download.downloadData(link
+							.replace("/date", ""));
+					visitedUrls.add(url);
+				}
 
+			}
+		} catch (IOException ie) {
+			log.error(ie.getMessage(),ie);
+			return;
 		}
 	}
 
