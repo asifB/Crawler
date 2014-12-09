@@ -22,8 +22,8 @@ public class RunCrawler {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
+		List<String> visitedUrls = crawler.getVisitedUrlList();
 		for (String link : crawler.getUnvisitedUrlList()) {
-			List<String> visitedUrls = crawler.getVisitedUrlList();
 			if (!visitedUrls.contains(link)) {
 				String url = download.downloadData(link.replace("/date", ""));
 				visitedUrls.add(url);
