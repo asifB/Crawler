@@ -5,25 +5,28 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Downloader {
 
-	
-	public void downloadData(String url, Crawler crawler) {
+	private static final Logger log = LoggerFactory.getLogger(Downloader.class
+			.getName());
+
+	public String downloadData(String url) {
+
+		URL finalUrl = null;
 		try {
+			finalUrl = new URL(url);
 			final String fileName = getFileName(url);
-			URL finalUrl = new URL(url);
 			final File filePath = new File(fileName);
 
 			FileUtils.copyURLToFile(finalUrl, filePath);
 
-			crawler.visitedUrls.add(url);
-
 		} catch (IOException ie) {
-			ie.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(ie.getMessage(),ie);
 		}
+		return finalUrl.toString();
 	}
 
 	private String getFileName(String url) throws IOException {
