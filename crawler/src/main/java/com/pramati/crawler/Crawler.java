@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author asifb
  */
 
-public class Crawler {
+public class Crawler extends Thread{
 
 	private static final Logger log = LoggerFactory.getLogger(Crawler.class
 			.getName());
@@ -74,6 +74,7 @@ public class Crawler {
 				absoluteURL = link.absUrl("href");
 				if (absoluteURL.contains("2014")
 						&& absoluteURL.contains("date")) {
+					log.info("Parsing.. "+absoluteURL);
 					if (!visitedUrls.contains(absoluteURL)
 							|| !toBeDownloadedUrls.contains(absoluteURL)) {
 						toBeDownloadedUrls.add(absoluteURL);
@@ -87,6 +88,24 @@ public class Crawler {
 		return downloadableUrlCount;
 	}
 
+	public void run() {
+		try {
+			log.info("Parsing urls....");
+			parseUrls();
+		} catch (IOException ie) {
+			log.error(ie.getMessage(), ie);
+			Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
+			log.info("Crawler got Interupted...Starting Pinger...");
+			pingerThread.run();
+			try {
+				Thread.currentThread().wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public List<String> getUnvisitedUrlList() {
 		return new ArrayList<String>(toBeDownloadedUrls);
 	}
