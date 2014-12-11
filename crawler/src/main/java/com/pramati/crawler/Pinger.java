@@ -1,10 +1,8 @@
 package com.pramati.crawler;
 
-import java.io.IOException;
-import java.net.InetAddress;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,22 +41,18 @@ public class Pinger implements Runnable {
 
 	public boolean ping() {
 
-		InetAddress address;
-		boolean isPingSuccessful = false;
+		boolean isPingSuccessful = true;
 		try {
-			log.info(pingUrl.getHost());
+			log.info("Pinging... "+pingUrl);
+			HttpURLConnection urlConnect = (HttpURLConnection) pingUrl
+					.openConnection();
+			Object objData = urlConnect.getContent();
 
-			address = InetAddress.getByName(pingUrl.getHost());
-			isPingSuccessful = address.isReachable(20000);
-			log.info("isPingSuccessful: " + isPingSuccessful);
-
-		} catch (UnknownHostException e) {
-			log.error("UnknownHostException at Pinger!!");
-			log.info("Waiting to ping again...");
-		} catch (IOException e1) {
-			log.error(e1.getMessage(), e1);
-			log.info("Waiting to ping again...");
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			isPingSuccessful = false;
 		}
+		log.info("isPingSuccessful: "+isPingSuccessful);
 		return isPingSuccessful;
 	}
 
