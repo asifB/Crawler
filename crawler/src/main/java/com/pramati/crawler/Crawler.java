@@ -89,21 +89,24 @@ public class Crawler extends Thread{
 	}
 
 	public void run() {
-		try {
-			log.info("Parsing urls....");
-			parseUrls();
-		} catch (IOException ie) {
-			log.error(ie.getMessage(), ie);
-			Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
-			log.info("Crawler got Interupted...Starting Pinger...");
-			pingerThread.run();
+		synchronized (this) {
 			try {
-				Thread.currentThread().wait();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info("Parsing urls....");
+				parseUrls();
+			} catch (IOException ie) {
+				log.error(ie.getMessage(), ie);
+				Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
+				log.info("Crawler got Interupted...Starting Pinger...");
+				pingerThread.start();
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
+		
 	}
 	
 	public List<String> getUnvisitedUrlList() {
