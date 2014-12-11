@@ -34,8 +34,8 @@ public class Pinger implements Runnable {
 		}
 
 		if (isPingSuccessful) {
-			Crawler.currentThread().notify();
 			log.info("Ping Succesful....Resuming Crawler");
+			notify();
 		}
 	}
 

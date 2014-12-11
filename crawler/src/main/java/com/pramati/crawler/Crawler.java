@@ -96,7 +96,7 @@ public class Crawler extends Thread{
 	}
 
 	public void run() {
-		synchronized (this) {
+		
 			try {
 				log.info("Parsing urls....");
 				parsedUrlCount = parseUrls(parsedUrlCount);
@@ -105,13 +105,14 @@ public class Crawler extends Thread{
 				Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
 				log.info("Crawler got Interupted...Starting Pinger...");
 				pingerThread.start();
-				try {
-					this.wait();
-					run();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				synchronized (pingerThread) {
+					try {
+						pingerThread.wait();
+						run();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}
 		}
 		
 	}
