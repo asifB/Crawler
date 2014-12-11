@@ -34,8 +34,8 @@ public class Pinger implements Runnable {
 		}
 
 		if (isPingSuccessful) {
-			log.info("Ping Succesful....Resuming Crawler");
 			Crawler.currentThread().notify();
+			log.info("Ping Succesful....Resuming Crawler");
 		}
 	}
 
@@ -44,8 +44,10 @@ public class Pinger implements Runnable {
 		boolean isPingSuccessful = true;
 		try {
 			log.info("Pinging... "+pingUrl);
+			
 			HttpURLConnection urlConnect = (HttpURLConnection) pingUrl
 					.openConnection();
+			urlConnect.setConnectTimeout(60000);
 			Object objData = urlConnect.getContent();
 
 		} catch (Exception e) {
