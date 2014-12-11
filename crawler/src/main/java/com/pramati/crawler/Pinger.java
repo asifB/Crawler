@@ -24,19 +24,22 @@ public class Pinger implements Runnable {
 
 	public void run() {
 		boolean isPingSuccessful = false;
-		while (!isPingSuccessful) {
+		synchronized (this) {
+			while (!isPingSuccessful) {
 				isPingSuccessful = ping();
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+			}
+
+			if (isPingSuccessful) {
+				log.info("Ping Succesful....Resuming Crawler");
+				this.notifyAll();
+			}
 		}
 
-		if (isPingSuccessful) {
-			log.info("Ping Succesful....Resuming Crawler");
-			notify();
-		}
 	}
 
 	public boolean ping() {
@@ -44,7 +47,6 @@ public class Pinger implements Runnable {
 		boolean isPingSuccessful = true;
 		try {
 			log.info("Pinging... "+pingUrl);
-			
 			HttpURLConnection urlConnect = (HttpURLConnection) pingUrl
 					.openConnection();
 			urlConnect.setConnectTimeout(60000);

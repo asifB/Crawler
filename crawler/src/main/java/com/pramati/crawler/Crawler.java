@@ -19,13 +19,13 @@ import org.slf4j.LoggerFactory;
  * @author asifb
  */
 
-public class Crawler extends Thread{
+public class Crawler extends Thread {
 
 	private static final Logger log = LoggerFactory.getLogger(Crawler.class
 			.getName());
 
-	private static List<String> visitedUrls; 
-	private static List<String> toBeDownloadedUrls; 
+	private static List<String> visitedUrls;
+	private static List<String> toBeDownloadedUrls;
 	private static int parsedUrlCount = 0;
 
 	private static Crawler crawler;
@@ -60,63 +60,57 @@ public class Crawler extends Thread{
 		}
 	}
 
-	public int parseUrls(int index) throws IOException {
+	public int parseUrls(int index) {
 		int downloadableUrlCount = index;
-		
+
 		if (visitedUrls.contains(BASEURL)) {
 			return downloadableUrlCount;
 		}
-		
+
 		Document doc = null;
 		String absoluteURL = "";
 		try {
 			doc = Jsoup.connect(BASEURL).get();
 			final Elements mailLinks = doc.select("a[href]");
-			List<Element> elementList = new ArrayList<Element>();
+			List<String> elementList = new ArrayList<String>();
 
 			for (final Element link : mailLinks) {
-				elementList.add(link);
+				absoluteURL = link.absUrl("href");
+				elementList.add(absoluteURL);
 			}
-			for(int i= index; i<elementList.size();i++){
-				absoluteURL = elementList.get(index).absUrl("href");
-				if (absoluteURL.contains("2014")
-						&& absoluteURL.contains("date")) {
-					log.info("Parsing.. "+absoluteURL);
+			int i = 0;
+			for (i = index; i < elementList.size(); i++) {
+				if ((elementList.get(i)).contains("2014")
+						&& (elementList.get(i)).contains("date")) {
+					log.info("Parsing.. " + absoluteURL);
 					if (!visitedUrls.contains(absoluteURL)
 							|| !toBeDownloadedUrls.contains(absoluteURL)) {
-						toBeDownloadedUrls.add(absoluteURL);
+						toBeDownloadedUrls.add(elementList.get(i));
 					}
 				}
 				downloadableUrlCount++;
 			}
 		} catch (IOException ie) {
-			throw new IOException(ie.getMessage());
+			Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
+			log.error(ie.getMessage(), ie);
+			log.info("Crawler got Interupted...Starting Pinger...");
+			synchronized (pingerThread) {
+				pingerThread.start();
+				try {
+					pingerThread.wait();
+					this.parseUrls(parsedUrlCount);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return downloadableUrlCount;
 	}
 
 	public void run() {
-		
-			try {
-				log.info("Parsing urls....");
-				parsedUrlCount = parseUrls(parsedUrlCount);
-			} catch (IOException ie) {
-				log.error(ie.getMessage(), ie);
-				Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
-				log.info("Crawler got Interupted...Starting Pinger...");
-				pingerThread.start();
-				synchronized (pingerThread) {
-					try {
-						pingerThread.wait();
-						run();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-		}
-		
+		parsedUrlCount = parseUrls(parsedUrlCount);
 	}
-	
+
 	public List<String> getUnvisitedUrlList() {
 		return new ArrayList<String>(toBeDownloadedUrls);
 	}
