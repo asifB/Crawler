@@ -26,6 +26,8 @@ public class Crawler extends Thread{
 
 	private static List<String> visitedUrls; 
 	private static List<String> toBeDownloadedUrls; 
+	private static int parsedUrlCount = 0;
+
 	private static Crawler crawler;
 	public static String BASEURL;
 
@@ -58,8 +60,8 @@ public class Crawler extends Thread{
 		}
 	}
 
-	public int parseUrls() throws IOException {
-		int downloadableUrlCount =0;
+	public int parseUrls(int index) throws IOException {
+		int downloadableUrlCount = index;
 		
 		if (visitedUrls.contains(BASEURL)) {
 			return downloadableUrlCount;
@@ -70,17 +72,22 @@ public class Crawler extends Thread{
 		try {
 			doc = Jsoup.connect(BASEURL).get();
 			final Elements mailLinks = doc.select("a[href]");
+			List<Element> elementList = new ArrayList<Element>();
+
 			for (final Element link : mailLinks) {
-				absoluteURL = link.absUrl("href");
+				elementList.add(link);
+			}
+			for(int i= index; i<elementList.size();i++){
+				absoluteURL = elementList.get(index).absUrl("href");
 				if (absoluteURL.contains("2014")
 						&& absoluteURL.contains("date")) {
 					log.info("Parsing.. "+absoluteURL);
 					if (!visitedUrls.contains(absoluteURL)
 							|| !toBeDownloadedUrls.contains(absoluteURL)) {
 						toBeDownloadedUrls.add(absoluteURL);
-						downloadableUrlCount++;
 					}
 				}
+				downloadableUrlCount++;
 			}
 		} catch (IOException ie) {
 			throw new IOException(ie.getMessage());
@@ -92,16 +99,16 @@ public class Crawler extends Thread{
 		synchronized (this) {
 			try {
 				log.info("Parsing urls....");
-				parseUrls();
+				parsedUrlCount = parseUrls(parsedUrlCount);
 			} catch (IOException ie) {
 				log.error(ie.getMessage(), ie);
 				Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
 				log.info("Crawler got Interupted...Starting Pinger...");
-				pingerThread.start();
+				pingerThread.run();
 				try {
 					this.wait();
+					run();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
