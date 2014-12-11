@@ -104,7 +104,7 @@ public class Crawler extends Thread{
 				log.error(ie.getMessage(), ie);
 				Thread pingerThread = new Thread(new Pinger(BASEURL), "Pinger");
 				log.info("Crawler got Interupted...Starting Pinger...");
-				pingerThread.run();
+				pingerThread.start();
 				try {
 					this.wait();
 					run();
